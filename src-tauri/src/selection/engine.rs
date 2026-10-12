@@ -150,7 +150,7 @@ mod tests {
 
     fn setup(
         config: SelectionConfig,
-        resultts: Vec<Result<SelectionData, CaptureError>>,
+        results: Vec<Result<SelectionData, CaptureError>>,
     ) -> (
         mpsc::Sender<SelectionInputEvent>,
         mpsc::Receiver<EngineEvent>,
@@ -159,7 +159,7 @@ mod tests {
         let (etx, erx) = mpsc::channel(32);
         let engine = SelectionEngine::new(
             SharedConfig::new(config),
-            Arc::new(MockCapturer::new(resultts)),
+            Arc::new(MockCapturer::new(results)),
         );
         tokio::spawn(engine.run(tx.clone(), rx, etx));
         (tx, erx)
