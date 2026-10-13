@@ -7,6 +7,7 @@ use tokio::sync::mpsc;
 
 use crate::selection::config::{SelectionConfig, SharedConfig, TriggerMode};
 use crate::selection::event::{CaptureError, SelectionData, SelectionInputEvent};
+use crate::selection::platform;
 use crate::selection::state::{Effect, SelectionStateMachine};
 use crate::selection::suppress::{self, Decision, SuppressReason};
 
@@ -86,7 +87,8 @@ impl SelectionEngine {
         match self.capturer.capture().await {
             Ok(data) => {
                 // TODO(平台层)
-                match suppress::evaluate(&data.text, None, &cfg.suppress) {
+                let foreground_app = platform::foreground_app_id();
+                match suppress::evaluate(&data.text, foreground_app.as_deref(), &cfg.suppress) {
                     Decision::Allow => {
                         let _ = events.send(EngineEvent::Captured(data)).await;
                     }

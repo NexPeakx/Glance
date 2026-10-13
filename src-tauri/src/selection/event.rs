@@ -35,6 +35,7 @@ pub struct SelectionData {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CaptureError {
+    PermissionDenied,  // 辅助功能权限未授予
     A11yUnavailable,   // UIA 拿不到
     ClipboardDisabled, // 配置禁用了回退
     ClipboardFailed,
@@ -47,6 +48,7 @@ impl std::fmt::Display for CaptureError {
             CaptureError::ClipboardDisabled => write!(f, "clipboard fallback disabled"),
             CaptureError::ClipboardFailed => write!(f, "clipboard capture failed"),
             CaptureError::Timeout => write!(f, "capture timed out"),
+            CaptureError::PermissionDenied => write!(f, "accessibility permission not granted"),
         }
     }
 }
