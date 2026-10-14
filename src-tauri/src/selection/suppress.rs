@@ -1,10 +1,13 @@
 //! 抑制规则：判断取词结果是否应触发翻译
 //! 状态机保证 `TriggerCapture` 时选区已稳定，本模块只做应用规则与文本长度检查
 
+use serde::Serialize;
+
 use crate::selection::config::SuppressConfig;
 
 /// 抑制原因
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum SuppressReason {
     /// 文本长度低于 `min_text_length`
     TextTooShort,

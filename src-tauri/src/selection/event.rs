@@ -33,15 +33,16 @@ pub struct SelectionData {
     pub source: CaptureSource,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum CaptureError {
-    PermissionDenied,     // 辅助功能权限未授予
-    A11yUnavailable,      // UIA 拿不到
-    SensitiveField,       // 密码框等敏感字段：禁止取词与剪贴板回退
-    ClipboardDisabled,    // 配置禁用了回退
-    ClipboardOpen,        // 无法打开/清空剪贴板（常被其他进程占用）
-    CopyInjectionFailed,  // 模拟 Ctrl+C 发送失败
-    ClipboardEmpty,       // 超时内剪贴板未出现新内容（目标不支持复制或太慢）
+    PermissionDenied,    // 辅助功能权限未授予
+    A11yUnavailable,     // UIA 拿不到
+    SensitiveField,      // 密码框等敏感字段：禁止取词与剪贴板回退
+    ClipboardDisabled,   // 配置禁用了回退
+    ClipboardOpen,       // 无法打开/清空剪贴板（常被其他进程占用）
+    CopyInjectionFailed, // 模拟 Ctrl+C 发送失败
+    ClipboardEmpty,      // 超时内剪贴板未出现新内容（目标不支持复制或太慢）
     Timeout,
 }
 impl std::fmt::Display for CaptureError {
@@ -49,7 +50,9 @@ impl std::fmt::Display for CaptureError {
         match self {
             CaptureError::A11yUnavailable => write!(f, "accessibility API unavailable"),
             CaptureError::ClipboardDisabled => write!(f, "clipboard fallback disabled"),
-            CaptureError::ClipboardOpen => write!(f, "clipboard open failed (locked by another process?)"),
+            CaptureError::ClipboardOpen => {
+                write!(f, "clipboard open failed (locked by another process?)")
+            }
             CaptureError::CopyInjectionFailed => write!(f, "failed to inject copy shortcut"),
             CaptureError::ClipboardEmpty => write!(f, "no new clipboard content within timeout"),
             CaptureError::Timeout => write!(f, "capture timed out"),
