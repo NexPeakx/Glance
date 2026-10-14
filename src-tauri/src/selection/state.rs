@@ -28,10 +28,7 @@ pub enum Effect {
     /// 忽略该事件
     None,
     /// 启动防抖定时器：超时后回送 `DebounceFired { generation }`
-    ArmDebounce {
-        generation: u64,
-        delay_ms: u32,
-    },
+    ArmDebounce { generation: u64, delay_ms: u32 },
     /// 立即执行取词
     TriggerCapture,
 }
@@ -84,9 +81,7 @@ impl SelectionStateMachine {
         match state {
             SelectionState::Idle => self.handle_idle(event),
             SelectionState::Selecting { .. } => self.handle_selecting(event, config),
-            SelectionState::PendingConfirm { generation } => {
-                self.handle_pending(event, generation)
-            }
+            SelectionState::PendingConfirm { generation } => self.handle_pending(event, generation),
         }
     }
 
@@ -484,7 +479,7 @@ mod tests {
         sm.handle(up(0, 0), &cfg); // g1
         sm.handle(down(0, 0), &cfg);
         sm.handle(up(0, 0), &cfg); // g2
-        // 旧定时器醒来：代数不匹配，丢弃
+                                   // 旧定时器醒来：代数不匹配，丢弃
         assert_eq!(sm.handle(fired(1), &cfg), Effect::None);
         assert_eq!(sm.handle(fired(2), &cfg), Effect::TriggerCapture);
     }
@@ -494,7 +489,10 @@ mod tests {
         let mut sm = SelectionStateMachine::new();
         let cfg = config();
 
-        assert_eq!(sm.handle(kd(Key::C, false, true), &cfg), Effect::TriggerCapture);
+        assert_eq!(
+            sm.handle(kd(Key::C, false, true), &cfg),
+            Effect::TriggerCapture
+        );
         assert_eq!(sm.state(), SelectionState::Idle);
     }
 
@@ -505,8 +503,11 @@ mod tests {
 
         sm.handle(down(0, 0), &cfg);
         sm.handle(up(0, 0), &cfg); // g1 待确认
-        // 显式取词意图：立即取词，且防抖定时器被取消
-        assert_eq!(sm.handle(kd(Key::C, false, true), &cfg), Effect::TriggerCapture);
+                                   // 显式取词意图：立即取词，且防抖定时器被取消
+        assert_eq!(
+            sm.handle(kd(Key::C, false, true), &cfg),
+            Effect::TriggerCapture
+        );
         assert_eq!(sm.handle(fired(1), &cfg), Effect::None);
         assert_eq!(sm.state(), SelectionState::Idle);
     }
@@ -517,7 +518,10 @@ mod tests {
         let cfg = config();
 
         // Shift+方向键：键盘选区开始
-        assert_eq!(sm.handle(kd(Key::ArrowRight, true, false), &cfg), Effect::None);
+        assert_eq!(
+            sm.handle(kd(Key::ArrowRight, true, false), &cfg),
+            Effect::None
+        );
         assert_eq!(
             sm.state(),
             SelectionState::Selecting {
@@ -526,7 +530,10 @@ mod tests {
             }
         );
         // 继续扩展
-        assert_eq!(sm.handle(kd(Key::ArrowRight, true, false), &cfg), Effect::None);
+        assert_eq!(
+            sm.handle(kd(Key::ArrowRight, true, false), &cfg),
+            Effect::None
+        );
         // Shift 释放 → 防抖
         assert_eq!(
             sm.handle(ku(Key::Shift, false), &cfg),
@@ -557,7 +564,10 @@ mod tests {
 
         sm.handle(kd(Key::ArrowRight, true, false), &cfg);
         // 未配合 Shift 的方向键：光标移动，选区折叠
-        assert_eq!(sm.handle(kd(Key::ArrowLeft, false, false), &cfg), Effect::None);
+        assert_eq!(
+            sm.handle(kd(Key::ArrowLeft, false, false), &cfg),
+            Effect::None
+        );
         assert_eq!(sm.state(), SelectionState::Idle);
         assert_eq!(sm.handle(ku(Key::Shift, false), &cfg), Effect::None);
     }
@@ -569,7 +579,7 @@ mod tests {
 
         sm.handle(down(0, 0), &cfg);
         sm.handle(up(0, 0), &cfg); // g1
-        // 防抖期间继续用键盘扩展选区：取消 g1，回到 Selecting
+                                   // 防抖期间继续用键盘扩展选区：取消 g1，回到 Selecting
         assert_eq!(sm.handle(kd(Key::ArrowUp, true, false), &cfg), Effect::None);
         assert_eq!(
             sm.state(),
@@ -596,7 +606,7 @@ mod tests {
 
         sm.handle(down(0, 0), &cfg);
         sm.handle(up(0, 0), &cfg); // g1
-        // 防抖期间打字：选区将被替换，取消触发
+                                   // 防抖期间打字：选区将被替换，取消触发
         assert_eq!(sm.handle(kd(Key::Other, false, false), &cfg), Effect::None);
         assert_eq!(sm.state(), SelectionState::Idle);
         assert_eq!(sm.handle(fired(1), &cfg), Effect::None);

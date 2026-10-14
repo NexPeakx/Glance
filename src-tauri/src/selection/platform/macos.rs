@@ -187,10 +187,10 @@ fn post_cmd_c() {
 }
 
 fn clipboard_capture() -> Result<String, CaptureError> {
-    let mut cb = arboard::Clipboard::new().map_err(|_| CaptureError::ClipboardFailed)?;
+    let mut cb = arboard::Clipboard::new().map_err(|_| CaptureError::ClipboardOpen)?;
 
     let original = cb.get_text().ok();
-    cb.clear().map_err(|_| CaptureError::ClipboardFailed)?;
+    cb.clear().map_err(|_| CaptureError::ClipboardOpen)?;
 
     post_cmd_c();
 
@@ -210,7 +210,7 @@ fn clipboard_capture() -> Result<String, CaptureError> {
         let _ = cb.set_text(original);
     }
 
-    captured.ok_or(CaptureError::ClipboardFailed)
+    captured.ok_or(CaptureError::ClipboardEmpty)
 }
 
 /// macOS 取词器

@@ -7,6 +7,7 @@ use crate::selection::engine::TextCapturer;
 
 #[cfg(target_os = "macos")]
 pub mod macos;
+pub mod windows;
 
 /// 构造当前平台的取词器
 #[cfg(target_os = "macos")]
@@ -15,8 +16,8 @@ pub fn create_capturer(config: SharedConfig) -> Arc<dyn TextCapturer> {
 }
 
 #[cfg(not(target_os = "macos"))]
-pub fn create_capturer(_config: SharedConfig) -> Arc<dyn TextCapturer> {
-    // todo 其他平台实现
+pub fn create_capturer(config: SharedConfig) -> Arc<dyn TextCapturer> {
+    Arc::new(windows::WindowsCapturer::new(config))
 }
 
 #[cfg(target_os = "macos")]
@@ -26,7 +27,7 @@ pub fn foreground_app_id() -> Option<String> {
 
 #[cfg(not(target_os = "macos"))]
 pub fn foreground_app_id() -> Option<String> {
-    // todo
+    windows::foreground_app_id()
 }
 
 #[cfg(target_os = "macos")]
@@ -35,6 +36,6 @@ pub fn is_accessibility_trusted(prompt: bool) -> bool {
 }
 
 #[cfg(not(target_os = "macos"))]
-pub fn is_accessibility_trusted(prompt: bool) -> bool {
+pub fn is_accessibility_trusted(_prompt: bool) -> bool {
     true
 }

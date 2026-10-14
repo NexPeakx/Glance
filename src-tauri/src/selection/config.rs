@@ -34,7 +34,7 @@ impl Default for SuppressConfig {
         Self {
             app_blacklist: vec![
                 "windowsterminal.exe".into(),
-                "keepass.exe".into(),  // 预设终端/密码管理器
+                "keepass.exe".into(), // 预设终端/密码管理器
             ],
             app_whitelist: Vec::new(),
             whitelist_mode: false,
@@ -79,7 +79,10 @@ impl SelectionConfig {
         self.trigger_delay_ms = self.trigger_delay_ms.clamp(100, 1000);
         self.drag_threshold_px = self.drag_threshold_px.clamp(5, 10);
         self.suppress.min_text_length = self.suppress.min_text_length.max(1);
-        self.suppress.max_text_length = self.suppress.max_text_length.max(self.suppress.min_text_length);
+        self.suppress.max_text_length = self
+            .suppress
+            .max_text_length
+            .max(self.suppress.min_text_length);
         self
     }
 }
@@ -105,7 +108,6 @@ impl SharedConfig {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -124,13 +126,14 @@ mod tests {
         let c = SelectionConfig {
             trigger_delay_ms: 5000,
             drag_threshold_px: 1,
-            suppress: SuppressConfig { 
-                min_text_length: 0, 
+            suppress: SuppressConfig {
+                min_text_length: 0,
                 max_text_length: 3,
                 ..Default::default()
             },
             ..Default::default()
-        }.normalized();
+        }
+        .normalized();
         assert_eq!(c.trigger_delay_ms, 1000);
         assert_eq!(c.drag_threshold_px, 5);
         assert_eq!(c.suppress.min_text_length, 1);
@@ -140,13 +143,12 @@ mod tests {
     #[test]
     fn hot_update_applies_and_normalizes() {
         let shared = SharedConfig::new(SelectionConfig::default());
-        let applied = shared.update(SelectionConfig { 
-            trigger_mode: TriggerMode::Hotkey, 
+        let applied = shared.update(SelectionConfig {
+            trigger_mode: TriggerMode::Hotkey,
             trigger_delay_ms: 50,
             ..Default::default()
         });
         assert_eq!(shared.get().trigger_mode, TriggerMode::Hotkey);
         assert_eq!(applied.trigger_delay_ms, 100);
     }
-    
 }
